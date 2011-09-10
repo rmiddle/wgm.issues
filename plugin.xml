@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.devblocks.com/schema/plugin.xsd">
+	<id>wgm.issues</id>
+	<name>[WGM] Issue Tracker</name>
+	<description>Adds Issue Tracker functionality to the helpdesk</description>
+	<author>WebGroup Media, LLC.</author>
+	<revision>1</revision>
+	<link>http://www.cerb5.com/</link>
+	<image>plugin.png</image>
+ 
+	<!-- Plugin Dependencies -->
+	
+	<dependencies>
+		<require plugin_id="cerberusweb.core" version="5.5.0" />
+	</dependencies>
+
+	<!-- Patches -->
+	
+	<patches>
+		<patch version="1.0.0" revision="1" file="patches/1.0.0.php" />
+	</patches>
+	
+	
+	<!-- Exported Classes -->
+	
+ 	<class_loader>
+	 	<file path="api/dao/project.php">
+			<class name="DAO_Project" />
+			<class name="Model_Project" />
+			<class name="SearchFields_Project" />
+			<class name="View_Project" />
+		</file>
+	 	<file path="api/dao/issue.php">
+			<class name="DAO_Issue" />
+			<class name="Model_Issue" />
+			<class name="SearchFields_Issue" />
+			<class name="View_Issue" />
+			<class name="DAO_IssueLink" />
+			<class name="Model_IssueLink" />
+			<class name="SearchFields_IssueLink" />
+		</file>
+		<file path="api/dao/milestone.php">
+			<class name="DAO_Milestone" />
+			<class name="Model_GithubMilestone" />
+			<class name="SearchFields_GithubMilestone" />
+			<class name="View_GithubMilestone" />
+		</file>
+		<file path="api/dao/container.php">
+			<class name="DAO_Container" />
+			<class name="Model_Container" />
+			<class name="SearchFields_Container" />
+			<class name="View_Container" />
+			<class name="DAO_ContainerLink" />
+			<class name="Model_ContainerLink" />
+			<class name="SearchFields_ContainerLink" />
+		</file>
+		<file path="api/App.php">
+			<class name="Extension_IssueSource" />
+		</file>
+	</class_loader>
+
+	<!-- Extensions -->
+ 
+	<extensions>
+	
+		<!-- Contexts -->
+		
+		<extension point="devblocks.context">
+			<id>wgm.contexts.issue</id>
+			<name>Issue</name>
+			<class>
+				<file>api/dao/issue.php</file>
+				<name>Context_Issue</name>
+			</class>
+			<params>
+				<param key="view_class" value="View_Issue" />
+				<param key="options">
+					<value>
+						<!--<data key="create" />-->
+						<!--<data key="find" />-->
+						<data key="workspace" />
+					</value>
+				</param>
+			</params>
+		</extension>
+		
+		<extension point="devblocks.context">
+			<id>wgm.contexts.milestone</id>
+			<name>Milestone</name>
+			<class>
+				<file>api/dao/milestone.php</file>
+				<name>Context_Milestone</name>
+			</class>
+			<params>
+				<param key="view_class" value="View_Milestone" />
+				<param key="options">
+					<value>
+						<!--<data key="create" />-->
+						<!--<data key="find" />-->
+						<data key="workspace" />
+					</value>
+				</param>
+			</params>
+		</extension>
+		
+		<!-- Cron Extensions -->
+		
+		<extension point="cerberusweb.cron">
+			<id>cron.issues.wgm</id>
+			<name>Issue Sync</name>
+			<class>
+				<file>api/App.php</file>
+				<name>IssueCron</name>
+			</class>
+			<params>
+			</params>
+		</extension>
+		
+		<extension point="cerberusweb.cron">
+			<id>cron.sync.containers.wgm</id>
+			<name>Container Sync</name>
+			<class>
+				<file>api/App.php</file>
+				<name>ContainerSyncCron</name>
+			</class>
+			<params>
+			</params>
+		</extension>
+		
+		<extension point="cerberusweb.cron">
+			<id>cron.recache.containers.wgm</id>
+			<name>Container Recache</name>
+			<class>
+				<file>api/App.php</file>
+				<name>ContainerRecacheCron</name>
+			</class>
+			<params>
+			</params>
+		</extension>
+		
+		<extension point="cerberusweb.cron">
+			<id>cron.milestones.wgm</id>
+			<name>Milestone Sync</name>
+			<class>
+				<file>api/App.php</file>
+				<name>MilestoneCron</name>
+			</class>
+			<params>
+			</params>
+		</extension>
+		
+		<!-- Activity Tabs -->
+		
+		<extension point="cerberusweb.activity.tab">
+			<id>issues.activity.tab</id>
+			<name>Issues Tab</name>
+			<class>
+				<file>api/App.php</file>
+				<name>IssuesActivityTab</name>
+			</class>
+			<params>
+				<param key="uri" value="issues" />
+				<param key="title" value="issues.activity.tab" />
+			</params>
+		</extension>
+		
+    </extensions> 
+</plugin>

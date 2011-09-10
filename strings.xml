@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tmx>
+<tmx version="1.4">
+	<header datatype="winres" segtype="sentence" adminlang="en-us" srclang="en-us" o-tmf="abc" />
+	<body>
+
+		<!-- Plugin Strings -->
+
+		<tu tuid='wgm.issues.common'>
+			<tuv xml:lang="en_US"><seg>Issues</seg></tuv>
+		</tu>
+		
+		<tu tuid='issues.activity.tab'>
+			<tuv xml:lang="en_US"><seg>Issues</seg></tuv>
+		</tu>
+		
+		
+		<!-- Projects -->
+		
+		<tu tuid='project.id'>
+			<tuv xml:lang="en_US"><seg>Id</seg></tuv>
+		</tu>
+		<tu tuid='project.name'>
+			<tuv xml:lang="en_US"><seg>Name</seg></tuv>
+		</tu>
+		<tu tuid='project.description'>
+			<tuv xml:lang="en_US"><seg>Description</seg></tuv>
+		</tu>
+		
+		<!-- Issues -->
+
+		<tu tuid='issue.id'>
+			<tuv xml:lang="en_US"><seg>Id</seg></tuv>
+		</tu>
+		<tu tuid='issue.number'>
+			<tuv xml:lang="en_US"><seg>Number</seg></tuv>
+		</tu>
+		<tu tuid='issue.title'>
+			<tuv xml:lang="en_US"><seg>Title</seg></tuv>
+		</tu>
+		<tu tuid='issue.body'>
+			<tuv xml:lang="en_US"><seg>Body</seg></tuv>
+		</tu>
+		<tu tuid='issue.created_date'>
+			<tuv xml:lang="en_US"><seg>Created Date</seg></tuv>
+		</tu>
+		<tu tuid='issue.updated_date'>
+			<tuv xml:lang="en_US"><seg>Updated Date</seg></tuv>
+		</tu>
+		<tu tuid='issue.closed_date'>
+			<tuv xml:lang="en_US"><seg>Closed Date</seg></tuv>
+		</tu>
+		<tu tuid='issue.assignee_id'>
+			<tuv xml:lang="en_US"><seg>Assignee</seg></tuv>
+		</tu>
+		<tu tuid='issue.repo_id'>
+			<tuv xml:lang="en_US"><seg>Repository</seg></tuv>
+		</tu>
+		<tu tuid='issue.milestone_id'>
+			<tuv xml:lang="en_US"><seg>Milestone</seg></tuv>
+		</tu>
+		<tu tuid='issue.state'>
+			<tuv xml:lang="en_US"><seg>State</seg></tuv>
+		</tu>
+		
+		<!-- Milestones -->
+
+		<tu tuid='milestone.id'>
+			<tuv xml:lang="en_US"><seg>Id</seg></tuv>
+		</tu>
+		<tu tuid='milestone.number'>
+			<tuv xml:lang="en_US"><seg>Number</seg></tuv>
+		</tu>
+		<tu tuid='milestone.name'>
+			<tuv xml:lang="en_US"><seg>Name</seg></tuv>
+		</tu>
+		<tu tuid='milestone.description'>
+			<tuv xml:lang="en_US"><seg>Description</seg></tuv>
+		</tu>
+		<tu tuid='milestone.state'>
+			<tuv xml:lang="en_US"><seg>State</seg></tuv>
+		</tu>
+		<tu tuid='milestone.creator'>
+			<tuv xml:lang="en_US"><seg>Creator</seg></tuv>
+		</tu>
+		<tu tuid='milestone.created_date'>
+			<tuv xml:lang="en_US"><seg>Created Date</seg></tuv>
+		</tu>
+		<tu tuid='milestone.due_date'>
+			<tuv xml:lang="en_US"><seg>Due Date</seg></tuv>
+		</tu>
+		
+		<!-- Containers -->
+
+		<tu tuid='container.id'>
+			<tuv xml:lang="en_US"><seg>Id</seg></tuv>
+		</tu>
+		<tu tuid='container.name'>
+			<tuv xml:lang="en_US"><seg>Name</seg></tuv>
+		</tu>
+		<tu tuid='container.description'>
+			<tuv xml:lang="en_US"><seg>Description</seg></tuv>
+		</tu>
+		<tu tuid='container.enabled'>
+			<tuv xml:lang="en_US"><seg>Enabled</seg></tuv>
+		</tu>
+		
+	</body>
+</tmx>
