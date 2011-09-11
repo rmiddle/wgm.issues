@@ -77,9 +77,7 @@ class DAO_Issue extends C4_ORMHelper {
 	*/
 	static function getByNumber($context, $source_id, $container_id) {
 		if(null !== $issue_link = DAO_IssueLink::getByNumber($context, $source_id, $container_id)) {
-			if(null !== $issue = DAO_Issue::get($issue_link->issue_id)) {
-				return $issue;
-			}
+			return $issue_link->getIssue();
 		}
 		
 		return null;
@@ -967,4 +965,8 @@ class Model_IssueLink {
 	public $context;
 	public $source_id;
 	public $container_id;
+	
+	public function getIssue() {
+		return DAO_Issue::get($this->issue_id);
+	}
 }

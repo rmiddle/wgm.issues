@@ -70,9 +70,7 @@ class DAO_Container extends C4_ORMHelper {
 	*/
 	static function getByNumber($context, $source_id, $user_id) {
 		if(null !== $container_link = DAO_ContainerLink::getByNumber($context, $source_id, $user_id)) {
-			if(null !== $container = DAO_Container::get($container_link->container_id)) {
-				return $container;
-			}
+			return $container_link->getContainer();
 		}
 	
 		return null;
