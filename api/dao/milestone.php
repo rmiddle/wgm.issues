@@ -10,7 +10,7 @@ class DAO_Milestone extends C4_ORMHelper {
 	static function create($fields) {
 		$db = DevblocksPlatform::getDatabaseService();
 
-		$sql = "INSERT INTO github_milestone () VALUES ()";
+		$sql = "INSERT INTO milestone () VALUES ()";
 		$db->Execute($sql);
 		$id = $db->LastInsertId();
 
@@ -20,11 +20,11 @@ class DAO_Milestone extends C4_ORMHelper {
 	}
 
 	static function update($ids, $fields) {
-		parent::_update($ids, 'github_milestone', $fields);
+		parent::_update($ids, 'milestone', $fields);
 	}
 
 	static function updateWhere($fields, $where) {
-		parent::_updateWhere('github_milestone', $fields, $where);
+		parent::_updateWhere('milestone', $fields, $where);
 	}
 	
 	
@@ -42,7 +42,7 @@ class DAO_Milestone extends C4_ORMHelper {
 
 		// SQL
 		$sql = "SELECT id, name, description, state, created_date, due_date ".
-			"FROM github_milestone ".
+			"FROM milestone ".
 			$where_sql.
 			$sort_sql.
 			$limit_sql
@@ -62,7 +62,7 @@ class DAO_Milestone extends C4_ORMHelper {
 			$id
 		));
 
-		if(isset($objects[$id]))
+		if(isset($objects[$id])) 
 			return $objects[$id];
 
 		return null;
@@ -72,18 +72,10 @@ class DAO_Milestone extends C4_ORMHelper {
 	* @param int $number
 	* @return Model_Milestone[]
 	*/
-	static function getByNumber($number) {
-		$milestone = self::getWhere(sprintf("%s = %d",
-			self::NUMBER,
-			$number
-		));
-	
-		return array_shift(self::getWhere(sprintf("%s = %d",
-			self::NUMBER,
-			$number
-		)));
-		if(!empty($milestone))
-			return array_shift($milestone);
+	static function getByNumber($context, $source_id, $user_id) {
+		if(null !== $milestone_link = DAO_MilestoneLink::getByNumber($context, $source_id, $user_id)) {
+			return $milestone_link->getMilestone();
+		}
 	
 		return null;
 	}
@@ -98,7 +90,6 @@ class DAO_Milestone extends C4_ORMHelper {
 		while($row = mysql_fetch_assoc($rs)) {
 			$object = new Model_Milestone();
 			$object->id = $row['id'];
-			$object->number = $row['number'];
 			$object->name = $row['name'];
 			$object->description = $row['description'];
 			$object->state = $row['state'];
@@ -121,7 +112,7 @@ class DAO_Milestone extends C4_ORMHelper {
 
 		$ids_list = implode(',', $ids);
 
-		$db->Execute(sprintf("DELETE FROM github_milestone WHERE id IN (%s)", $ids_list));
+		$db->Execute(sprintf("DELETE FROM milestone WHERE id IN (%s)", $ids_list));
 
 		// Fire event
 		/*
@@ -150,15 +141,13 @@ class DAO_Milestone extends C4_ORMHelper {
 		list($tables,$wheres) = parent::_parseSearchParams($params, $columns, $fields, $sortBy);
 
 		$select_sql = sprintf("SELECT ".
-			"github_milestone.id as %s, ".
-			"github_milestone.number as %s, ".
-			"github_milestone.name as %s, ".
-			"github_milestone.description as %s, ".
-			"github_milestone.state as %s, ".
-			"github_milestone.created_date as %s, ".
-			"github_milestone.due_date as %s ",
+			"milestone.id as %s, ".
+			"milestone.name as %s, ".
+			"milestone.description as %s, ".
+			"milestone.state as %s, ".
+			"milestone.created_date as %s, ".
+			"milestone.due_date as %s ",
 			SearchFields_Milestone::ID,
-			SearchFields_Milestone::NUMBER,
 			SearchFields_Milestone::NAME,
 			SearchFields_Milestone::DESCRIPTION,
 			SearchFields_Milestone::STATE,
@@ -166,13 +155,13 @@ class DAO_Milestone extends C4_ORMHelper {
 			SearchFields_Milestone::DUE_DATE
 		);
 			
-		$join_sql = "FROM github_milestone ";
+		$join_sql = "FROM milestone ";
 
 		// Custom field joins
 		//list($select_sql, $join_sql, $has_multiple_values) = self::_appendSelectJoinSqlForCustomFieldTables(
 		//	$tables,
 		//	$params,
-		//	'github_milestone.id',
+		//	'milestone.id',
 		//	$select_sql,
 		//	$join_sql
 		//);
@@ -184,7 +173,7 @@ class DAO_Milestone extends C4_ORMHelper {
 		$sort_sql = (!empty($sortBy)) ? sprintf("ORDER BY %s %s ",$sortBy,($sortAsc || is_null($sortAsc))?"ASC":"DESC") : " ";
 
 		return array(
-			'primary_table' => 'github_milestone',
+			'primary_table' => 'milestone',
 			'select' => $select_sql,
 			'join' => $join_sql,
 			'where' => $where_sql,
@@ -221,7 +210,7 @@ class DAO_Milestone extends C4_ORMHelper {
 		$select_sql.
 		$join_sql.
 		$where_sql.
-		($has_multiple_values ? 'GROUP BY github_milestone.id ' : '').
+		($has_multiple_values ? 'GROUP BY milestone.id ' : '').
 		$sort_sql;
 			
 		if($limit > 0) {
@@ -246,7 +235,7 @@ class DAO_Milestone extends C4_ORMHelper {
 		// [JAS]: Count all
 		if($withCounts) {
 			$count_sql =
-			($has_multiple_values ? "SELECT COUNT(DISTINCT github_milestone.id) " : "SELECT COUNT(github_milestone.id) ").
+			($has_multiple_values ? "SELECT COUNT(DISTINCT milestone.id) " : "SELECT COUNT(milestone.id) ").
 			$join_sql.
 			$where_sql;
 			$total = $db->GetOne($count_sql);
@@ -261,7 +250,6 @@ class DAO_Milestone extends C4_ORMHelper {
 
 class SearchFields_Milestone implements IDevblocksSearchFields {
 	const ID = 'gm_id';
-	const NUMBER = 'gm_number';
 	const NAME = 'gm_name';
 	const DESCRIPTION = 'gm_description';
 	const STATE = 'gm_state';
@@ -275,13 +263,12 @@ class SearchFields_Milestone implements IDevblocksSearchFields {
 		$translate = DevblocksPlatform::getTranslationService();
 
 		$columns = array(
-			self::ID => new DevblocksSearchField(self::ID, 'github_milestone', 'id', $translate->_('github_milestone.id')),
-			self::NUMBER => new DevblocksSearchField(self::NUMBER, 'github_milestone', 'number', $translate->_('github_milestone.number')),
-			self::NAME => new DevblocksSearchField(self::NAME, 'github_milestone', 'name', $translate->_('github_milestone.name')),
-			self::DESCRIPTION => new DevblocksSearchField(self::DESCRIPTION, 'github_milestone', 'description', $translate->_('github_milestone.description')),
-			self::STATE => new DevblocksSearchField(self::STATE, 'github_milestone', 'state', $translate->_('github_milestone.state')),
-			self::CREATED_DATE => new DevblocksSearchField(self::CREATED_DATE, 'github_milestone', 'created_date', $translate->_('github_milestone.created_date')),
-			self::DUE_DATE => new DevblocksSearchField(self::DUE_DATE, 'github_milestone', 'due_date', $translate->_('github_milestone.due_date')),
+			self::ID => new DevblocksSearchField(self::ID, 'milestone', 'id', $translate->_('milestone.id')),
+			self::NAME => new DevblocksSearchField(self::NAME, 'milestone', 'name', $translate->_('milestone.name')),
+			self::DESCRIPTION => new DevblocksSearchField(self::DESCRIPTION, 'milestone', 'description', $translate->_('milestone.description')),
+			self::STATE => new DevblocksSearchField(self::STATE, 'milestone', 'state', $translate->_('milestone.state')),
+			self::CREATED_DATE => new DevblocksSearchField(self::CREATED_DATE, 'milestone', 'created_date', $translate->_('milestone.created_date')),
+			self::DUE_DATE => new DevblocksSearchField(self::DUE_DATE, 'milestone', 'due_date', $translate->_('milestone.due_date')),
 		);
 
 		// Custom Fields
@@ -302,7 +289,6 @@ class SearchFields_Milestone implements IDevblocksSearchFields {
 
 class Model_Milestone {
 	public $id;
-	public $number;
 	public $name;
 	public $description;
 	public $state;
@@ -311,7 +297,7 @@ class Model_Milestone {
 };
 
 class View_Milestone extends C4_AbstractView {
-	const DEFAULT_ID = 'github_milestone';
+	const DEFAULT_ID = 'milestone';
 
 	function __construct() {
 		$translate = DevblocksPlatform::getTranslationService();
@@ -325,7 +311,6 @@ class View_Milestone extends C4_AbstractView {
 
 		$this->view_columns = array(
 			SearchFields_Milestone::ID,
-			SearchFields_Milestone::NUMBER,
 			SearchFields_Milestone::NAME,
 			SearchFields_Milestone::DESCRIPTION,
 			SearchFields_Milestone::STATE,
@@ -382,7 +367,6 @@ class View_Milestone extends C4_AbstractView {
 		// [TODO] Move the fields into the proper data type
 		switch($field) {
 			case SearchFields_Milestone::ID:
-			case SearchFields_Milestone::NUMBER:
 			case SearchFields_Milestone::NAME:
 			case SearchFields_Milestone::DESCRIPTION:
 			case SearchFields_Milestone::STATE:
@@ -434,7 +418,6 @@ class View_Milestone extends C4_AbstractView {
 		// [TODO] Move fields into the right data type
 		switch($field) {
 			case SearchFields_Milestone::ID:
-			case SearchFields_Milestone::NUMBER:
 			case SearchFields_Milestone::NAME:
 			case SearchFields_Milestone::DESCRIPTION:
 			case SearchFields_Milestone::STATE:
@@ -585,11 +568,11 @@ class Context_Milestone extends Extension_DevblocksContext {
 		// Token labels
 		$token_labels = array(
 			'id' => $prefix.$translate->_('common.id'),
-			'name' => $prefix.$translate->_('github_milestone.name'),
-			'description' => $prefix.$translate->_('github_milestone.description'),
-			'created_date|date' => $prefix.$translate->_('github_milestone.created_date'),
-			'due_date|date' => $prefix.$translate->_('github_milestone.due_date'),
-			'state' => $prefix.$translate->_('github_milestone.state'),
+			'name' => $prefix.$translate->_('milestone.name'),
+			'description' => $prefix.$translate->_('milestone.description'),
+			'created_date|date' => $prefix.$translate->_('milestone.created_date'),
+			'due_date|date' => $prefix.$translate->_('milestone.due_date'),
+			'state' => $prefix.$translate->_('milestone.state'),
 		);
 
 		// Token values
@@ -661,8 +644,8 @@ class Context_Milestone extends Extension_DevblocksContext {
 
 		if(!empty($context) && !empty($context_id)) {
 			$params_req = array(
-			new DevblocksSearchCriteria(SearchFields_Milestone::CONTEXT_LINK,'=',$context),
-			new DevblocksSearchCriteria(SearchFields_Milestone::CONTEXT_LINK_ID,'=',$context_id),
+				new DevblocksSearchCriteria(SearchFields_Milestone::CONTEXT_LINK,'=',$context),
+				new DevblocksSearchCriteria(SearchFields_Milestone::CONTEXT_LINK_ID,'=',$context_id),
 			);
 		}
 
@@ -673,3 +656,307 @@ class Context_Milestone extends Extension_DevblocksContext {
 		return $view;
 	}
 };
+
+class DAO_MilestoneLink extends C4_ORMHelper {
+	const MILESTONE_ID = 'milestone_id';
+	const CONTEXT = 'context';
+	const SOURCE_ID = 'source_id';
+	const CONTAINER_ID = 'container_id';
+
+	static function create($milestone_id, $context, $source_id, $container_id) {
+		$db = DevblocksPlatform::getDatabaseService();
+		$db->Execute(sprintf("INSERT IGNORE INTO milestone_link (milestone_id, context, source_id, container_id) ".
+			"VALUES (%d, %s, %d, %d)",
+			$milestone_id,
+			$db->qstr($context),
+			$source_id,
+			$container_id
+		));
+	}
+
+	/**
+	 * @param string $where
+	 * @return Model_MilestoneLink[]
+	 */
+	static function getWhere($where=null) {
+		$db = DevblocksPlatform::getDatabaseService();
+
+		$sql = "SELECT milestone_id, context, source_id, container_id ".
+			"FROM milestone_link ".
+		(!empty($where) ? sprintf("WHERE %s ",$where) : "");
+		$rs = $db->Execute($sql);
+
+		return self::_getObjectsFromResult($rs);
+	}
+
+	/**
+	 * @param string $context
+	 * @param int $source_id
+	 * @param int $milestone_id
+	 * @return Model_MilestoneLink[]
+	 */
+
+	static function getByMilestoneId($milestone_id) {
+		$db = DevblocksPlatform::getDatabaseService();
+
+		$objects = self::getWhere(sprintf("%s = %d",
+			self::MILESTONE_ID,
+			$milestone_id
+		));
+
+		if(isset($objects[$milestone_id]))
+			return $objects[$milestone_id];
+
+		return null;
+	}
+
+	/**
+	 * @param string $context
+	 * @param int $source_id
+	 * @param int $container_id
+	 * @return Model_MilestoneLink[]
+	 */
+
+	static function getByNumber($context, $source_id, $container_id) {
+		$db = DevblocksPlatform::getDatabaseService();
+
+		return array_shift(self::getWhere(sprintf("%s = %s AND %s = %d AND %s = %d",
+			self::CONTEXT,
+			$db->qstr($context),
+			self::SOURCE_ID,
+			$source_id,
+			self::CONTAINER_ID,
+			$container_id
+		)));
+	}
+
+	/**
+	 * @param string $context
+	 * @return Model_MilestoneLink[]
+	 */
+
+	static function getByContext($context) {
+		$db = DevblocksPlatform::getDatabaseService();
+
+		$objects = self::getWhere(sprintf("%s = %s",
+		self::CONTEXT,
+		$db->qstr($context)
+		));
+
+		if(!empty($objects)) {
+			return $objects;
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * @param resource $rs
+	 * @return Model_MilestoneLink[]
+	 */
+	static private function _getObjectsFromResult($rs) {
+		$objects = array();
+
+		while($row = mysql_fetch_assoc($rs)) {
+			$object = new Model_MilestoneLink();
+			$object->milestone_id = $row['milestone_id'];
+			$object->context = $row['context'];
+			$object->source_id = $row['source_id'];
+			$object->container_id = $row['container_id'];
+			$objects[$object->milestone_id] = $object;
+		}
+
+		mysql_free_result($rs);
+
+		return $objects;
+	}
+
+	static function delete($ids) {
+		if(!is_array($ids)) $ids = array($ids);
+		$db = DevblocksPlatform::getDatabaseService();
+
+		if(empty($ids))
+		return;
+
+		$ids_list = implode(',', $ids);
+
+		$db->Execute(sprintf("DELETE FROM milestone_link WHERE id IN (%s)", $ids_list));
+
+		// Fire event
+		/*
+		$eventMgr = DevblocksPlatform::getEventService();
+		$eventMgr->trigger(
+		new Model_DevblocksEvent(
+		'context.delete',
+		array(
+		'context' => 'cerberusweb.contexts.',
+		'context_ids' => $ids
+		)
+		)
+		);
+		*/
+
+		return true;
+	}
+
+	public static function getSearchQueryComponents($columns, $params, $sortBy=null, $sortAsc=null) {
+		$fields = SearchFields_MilestoneLink::getFields();
+
+		// Sanitize
+		if('*'==substr($sortBy,0,1) || !isset($fields[$sortBy]))
+		$sortBy=null;
+
+		list($tables,$wheres) = parent::_parseSearchParams($params, $columns, $fields, $sortBy);
+
+		$select_sql = sprintf("SELECT ".
+			"milestone_link.milestone_id as %s, ".
+			"milestone_link.source_context as %s, ".
+			"milestone_link.source_id as %s, ".
+			"milestone_link.container_id as %s ",
+			SearchFields_MilestoneLink::MILESTONE_ID,
+			SearchFields_MilestoneLink::CONTEXT,
+			SearchFields_MilestoneLink::SOURCE_ID,
+			SearchFields_MilestoneLink::CONTAINER_ID
+		);
+			
+		$join_sql = "FROM milestone_link ";
+
+		// Custom field joins
+		//list($select_sql, $join_sql, $has_multiple_values) = self::_appendSelectJoinSqlForCustomFieldTables(
+		//	$tables,
+		//	$params,
+		//	'milestone_link.id',
+		//	$select_sql,
+		//	$join_sql
+		//);
+		$has_multiple_values = false; // [TODO] Temporary when custom fields disabled
+
+		$where_sql = "".
+		(!empty($wheres) ? sprintf("WHERE %s ",implode(' AND ',$wheres)) : "WHERE 1 ");
+			
+		$sort_sql = (!empty($sortBy)) ? sprintf("ORDER BY %s %s ",$sortBy,($sortAsc || is_null($sortAsc))?"ASC":"DESC") : " ";
+
+		return array(
+			'primary_table' => 'milestone_link',
+			'select' => $select_sql,
+			'join' => $join_sql,
+			'where' => $where_sql,
+			'has_multiple_values' => $has_multiple_values,
+			'sort' => $sort_sql,
+		);
+	}
+
+	/**
+	 * Enter description here...
+	 *
+	 * @param array $columns
+	 * @param DevblocksSearchCriteria[] $params
+	 * @param integer $limit
+	 * @param integer $page
+	 * @param string $sortBy
+	 * @param boolean $sortAsc
+	 * @param boolean $withCounts
+	 * @return array
+	 */
+	static function search($columns, $params, $limit=10, $page=0, $sortBy=null, $sortAsc=null, $withCounts=true) {
+		$db = DevblocksPlatform::getDatabaseService();
+
+		// Build search queries
+		$query_parts = self::getSearchQueryComponents($columns,$params,$sortBy,$sortAsc);
+
+		$select_sql = $query_parts['select'];
+		$join_sql = $query_parts['join'];
+		$where_sql = $query_parts['where'];
+		$has_multiple_values = $query_parts['has_multiple_values'];
+		$sort_sql = $query_parts['sort'];
+
+		$sql =
+		$select_sql.
+		$join_sql.
+		$where_sql.
+		($has_multiple_values ? 'GROUP BY milestone_link.id ' : '').
+		$sort_sql;
+			
+		if($limit > 0) {
+			$rs = $db->SelectLimit($sql,$limit,$page*$limit) or die(__CLASS__ . '('.__LINE__.')'. ':' . $db->ErrorMsg()); /* @var $rs ADORecordSet */
+		} else {
+			$rs = $db->Execute($sql) or die(__CLASS__ . '('.__LINE__.')'. ':' . $db->ErrorMsg()); /* @var $rs ADORecordSet */
+			$total = mysql_num_rows($rs);
+		}
+
+		$results = array();
+		$total = -1;
+
+		while($row = mysql_fetch_assoc($rs)) {
+			$result = array();
+			foreach($row as $f => $v) {
+				$result[$f] = $v;
+			}
+			$object_id = intval($row[SearchFields_MilestoneLink::ID]);
+			$results[$object_id] = $result;
+		}
+
+		// [JAS]: Count all
+		if($withCounts) {
+			$count_sql =
+			($has_multiple_values ? "SELECT COUNT(DISTINCT milestone_link.id) " : "SELECT COUNT(milestone_link.id) ").
+			$join_sql.
+			$where_sql;
+			$total = $db->GetOne($count_sql);
+		}
+
+		mysql_free_result($rs);
+
+		return array($results,$total);
+	}
+
+};
+
+class SearchFields_MilestoneLink implements IDevblocksSearchFields {
+	const MILESTONE_ID = 'c_milestone_id';
+	const CONTEXT = '_context';
+	const SOURCE_ID = 'i_source_id';
+	const CONTAINER_ID = 'i_container_id';
+
+	/**
+	 * @return DevblocksSearchField[]
+	 */
+	static function getFields() {
+		$translate = DevblocksPlatform::getTranslationService();
+
+		$columns = array(
+			self::MILESTONE_ID => new DevblocksSearchField(self::MILESTONE_ID, 'milestone_link', 'milestone_id', $translate->_('milestone_link.milestone_id')),
+			self::CONTEXT => new DevblocksSearchField(self::CONTEXT, 'milestone_link', 'context', $translate->_('milestone_link.context')),
+			self::SOURCE_ID => new DevblocksSearchField(self::SOURCE_ID, 'milestone_link', 'source_id', $translate->_('milestone_link.source_id')),
+			self::CONTAINER_ID => new DevblocksSearchField(self::CONTAINER_ID, 'milestone_link', 'container_id', $translate->_('milestone_link.container_id')),
+		);
+
+		// Custom Fields
+		//$fields = DAO_CustomField::getByContext(CerberusContexts::XXX);
+
+		//if(is_array($fields))
+		//foreach($fields as $field_id => $field) {
+		//	$key = 'cf_'.$field_id;
+		//	$columns[$key] = new DevblocksSearchField($key,$key,'field_value',$field->name);
+		//}
+
+		// Sort by label (translation-conscious)
+		uasort($columns, create_function('$a, $b', "return strcasecmp(\$a->db_label,\$b->db_label);\n"));
+
+		return $columns;
+	}
+};
+
+
+class Model_MilestoneLink {
+	public $milestone_id;
+	public $context;
+	public $source_id;
+	public $container_id;
+
+	public function getMilestone() {
+		return DAO_Milestone::get($this->milestone_id);
+	}
+
+}

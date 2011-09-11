@@ -18,6 +18,7 @@
 	
 	<patches>
 		<patch version="1.0.0" revision="1" file="patches/1.0.0.php" />
+		<patch version="1.0.1" revision="2" file="patches/1.0.1.php" />
 	</patches>
 	
 	
